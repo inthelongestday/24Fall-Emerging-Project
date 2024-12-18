@@ -118,7 +118,8 @@ fun CameraScreen() {
             // TODO:
             //  Set imageAnalyzer to use the new classifier
 
-            imageAnalyzer.setAnalyzer(cameraExecutor) { image ->
+            val cpu2Executor = remember { Executors.newFixedThreadPool(2) }
+            imageAnalyzer.setAnalyzer(cpu2Executor) { image ->
                 detectObjects(image, personClassifier2CPU)
                 // 위에 CPU 2 threads를 사용하는 새로운 classifier 사용
                 image.close()
