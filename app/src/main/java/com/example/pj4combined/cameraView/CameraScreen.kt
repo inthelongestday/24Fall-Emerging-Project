@@ -42,7 +42,7 @@ private lateinit var bitmapBuffer: Bitmap
 
 
 
-@Composable // 특정 state의 값이 바뀔 때마다 재실행되는 것이 composable function의 특징
+@Composable
 fun CameraScreen() {
     // Obtain the current context and lifecycle owner
     val context = LocalContext.current
@@ -71,19 +71,19 @@ fun CameraScreen() {
 
     val previewView = remember { PreviewView(context) }
 
-    LaunchedEffect(Unit) { // 여기는 재실행되어도 다시 실행되지 않음 (LaunchedEffect의 특징)
+    LaunchedEffect(Unit) {
 
         val personClassifierGPU = PersonClassifier()
-        withContext(Dispatchers.IO) { // background execution, not necessary
+        withContext(Dispatchers.IO) {
             personClassifierGPU.initialize(context, useGPU = true)
-        } // 여기를 CPU 달도록 수정한 버전을 TODO에서 활용하면 될 듯..
+        }
         personClassifierGPU.setDetectorListener(listener)
 
         preview.surfaceProvider = previewView.surfaceProvider
 
         // The analyzer can then be assigned to the instance
         imageAnalyzer.setAnalyzer(cameraExecutor) { image ->
-            detectObjects(image, personClassifierGPU) // 위의 classifier 사용
+            detectObjects(image, personClassifierGPU)
             // Close the image proxy
             image.close()
         }
@@ -96,14 +96,14 @@ fun CameraScreen() {
             lifecycleOwner,
             CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build(),
             preview,
-            imageAnalyzer // bind camera to image analyzer
+            imageAnalyzer
         )
         Log.d("CS330", "Camera bound")
     }
 
     if (detectionResults.value != null) {
         // TODO:
-        //  Choose your inference time threshold -> 2, 3 하고 나서 적절히 수정
+        //  Choose your inference time threshold
         val inferenceTimeThreshold = 300 // Adjusted after experiments, average without LLM running : ~100ms
 
         if (detectionResults.value!!.inferenceTime > inferenceTimeThreshold) {
