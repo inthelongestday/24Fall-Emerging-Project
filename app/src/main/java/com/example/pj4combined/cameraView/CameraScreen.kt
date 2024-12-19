@@ -108,26 +108,16 @@ fun CameraScreen() {
 
         if (detectionResults.value!!.inferenceTime > inferenceTimeThreshold) {
             Log.d("CS330", "GPU too slow, switching to CPU start")
-//            // TODO:
-//            //  Create new classifier to be run on CPU with 2 threads
-//
-//            val personClassifier2CPU = PersonClassifier()
-//            personClassifier2CPU.initialize(context, 2, useGPU = false)
-//            personClassifier2CPU.setDetectorListener(listener)
-//
-//            // TODO:
-//            //  Set imageAnalyzer to use the new classifier
-//
-//            val cpu2Executor = remember { Executors.newFixedThreadPool(2) }
-//            imageAnalyzer.setAnalyzer(cpu2Executor) { image ->
-//                detectObjects(image, personClassifier2CPU)
-//                // 위에 CPU 2 threads를 사용하는 새로운 classifier 사용
-//                image.close()
-//            } // 이렇게 하면 segmentation fault가 남. 왜지?
+            // TODO:
+            //  Create new classifier to be run on CPU with 2 threads
+
+            // TODO:
+            //  Set imageAnalyzer to use the new classifier
 
             // clear original GPU using classifier-bound imageAnalyzer
             imageAnalyzer.clearAnalyzer()
 
+            // create a new executor with 2-thread pool
             val cpu2Executor = Executors.newFixedThreadPool(2)
 
             try {
@@ -139,7 +129,6 @@ fun CameraScreen() {
                         try {
                             threadLocalClassifier.initialize(context, threadNumber = 1, useGPU = false)
                             threadLocalClassifier.setDetectorListener(listener)
-
                             // this handled the synchronization error..
                             // bitmapBuffer should be also synchronized for 2 threads (classifiers)
                             synchronized(bitmapBuffer) {
@@ -148,7 +137,6 @@ fun CameraScreen() {
                         } catch (e: Exception) {
                             Log.e("CS330", "Error during object detection: ${e.message}")
                         } finally {
-                            // 이미지 리소스 해제
                             image.close()
                         }
                     }
